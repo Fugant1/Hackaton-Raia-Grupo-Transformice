@@ -21,7 +21,8 @@ def get_metrics_node(state: ChatState):
 
 def highlights_node(state: ChatState, openai_api_key: str):
     metrics = state['tools_info'].get("Metricas", [])
-    llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
+    #llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
+    llm = ChatGoogleGenerativeAI(temperature=0, model="gemini-2.5-flash-lite", api_key=openai_api_key)
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Você é um jornalista experiente que identifica pontos críticos em posts do Twitter baseado em métricas fornecidas."),
         ("user", """Retorne apenas os textos que são pontos críticos separados por '/', sem comentários.
@@ -35,10 +36,11 @@ def highlights_node(state: ChatState, openai_api_key: str):
 
 def final_answer_node(state: ChatState, openai_api_key: str):
     metrics = state['tools_info'].get("Metricas", [])
-    llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
+    #llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
+    llm = ChatGoogleGenerativeAI(temperature=0.5, model="gemini-2.5-flash-lite", api_key=openai_api_key)
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Você é um jornalista experiente que sintetiza a credibilidade de posts no Twitter baseado em métricas fornecidas e trechos destacados considerados pontos críticos"),
-        ("user", """
+        ("user", """Responda de forma resumida e objetiva
         Twitter post: {post_text}
         Métricas: {metrics}
         Pontos de destaque: {highlights}.""")
