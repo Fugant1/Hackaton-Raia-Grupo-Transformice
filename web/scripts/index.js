@@ -18,9 +18,13 @@ const observer = new MutationObserver(() => {
 
     if (window.location.pathname.includes('/status/')) {
         latest_path_name = window.location.pathname;
+        showLoadingPopup();
         waitForElement('[data-testid="tweetText"]')
             .then(element => scan(element.innerText))
-            .then(showAvaliacaoPopup);
+            .then(avaliacao => {
+                hideLoadingPopup();
+                showAvaliacaoPopup(avaliacao);
+            });
     } else {
         hideAvaliacaoPopup();
     }
@@ -36,9 +40,23 @@ function showAvaliacaoPopup(avaliacao) {
     console.log({ avaliacao });
 
     const popup = document.createElement('div');
-    const text = document.createTextNode('Avaliacao aqui');
+    const metrics = avaliacao.metrics.map(m => {
+        return `${m.description}: ${m.value}`;
+    })
 
-    popup.appendChild(text);
+    const content = `
+        <h2>${avaliacao.output}</h2>
+        <ul>
+            ${metrics.map(metric => `<li>${metric}</li>`).join('')}
+        </ul>
+        <h3>Pontos de atenção:</h3>
+        <ul>
+            ${avaliacao.critical_points.map(point => `<li>${point}</li>`).join('')}
+        </ul>
+    `;
+
+    popup.innerHTML = content;
+
     popup.style.position = "fixed";
     popup.style.top = "5%";
     popup.style.right = "5%";
@@ -60,6 +78,32 @@ function hideAvaliacaoPopup() {
     document.querySelector('#unfaker-popup-123123123')?.remove();
 }
 
+function showLoadingPopup() {
+    const popup = document.createElement('div');
+    const text = document.createTextNode('Analisando post...');
+
+    popup.appendChild(text);
+    popup.style.position = "fixed";
+    popup.style.top = "5%";
+    popup.style.right = "5%";
+    popup.style.width = "400px";
+    popup.style.padding = "20px";
+    popup.style.background = "#222";
+    popup.style.color = "#eee";
+    popup.style.borderRadius = "10px";
+    popup.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.5)";
+    popup.style.zIndex = "10000";
+    popup.style.fontFamily = "Arial, sans-serif";
+    popup.style.textAlign = "center";
+
+    popup.id = "unfaker-popup-123123123";
+    document.body.prepend(popup);
+}
+
+function hideLoadingPopup() {
+    document.querySelector('#unfaker-popup-123123123')?.remove();
+}
+
 function waitForElement(selector) {
     return new Promise(resolve => {
         if (document.querySelector(selector)) {
@@ -78,4 +122,8 @@ function waitForElement(selector) {
             subtree: true
         });
     });
+}
+
+function wait(ms) {
+    return new Promise(res => setTimeout(res, ms));
 }
