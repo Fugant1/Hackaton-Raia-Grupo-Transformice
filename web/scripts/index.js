@@ -1,15 +1,29 @@
 
-const API_URL = `http//localhost:8000`;
+const API_URL = `http://localhost:8000`;
 
-const scan = async url => {
-    const params = new URLSearchParams({ url });
+const scan = async post_text => {
+    const params = new URLSearchParams({ post_text });
 
     return fetch(`${API_URL}/scan?${params.toString()}`)
         .then(response => response.json())
         .catch(err => err.message);
 }
 
-scan(window.location.href).then(showAvaliacaoPopup);
+const observer = new MutationObserver(() => {
+    if (window.location.pathname.includes('/status/')) {
+        waitForElement('[data-testid="tweetText"]')
+            .then(element => scan(element.innerText))
+            .then(showAvaliacaoPopup);
+    } else {
+        hideAvaliacaoPopup();
+    }
+});
+
+observer.observe(document.body, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+});
 
 function showAvaliacaoPopup(avaliacao) {
     console.log({ avaliacao });
@@ -31,6 +45,31 @@ function showAvaliacaoPopup(avaliacao) {
     popup.style.fontFamily = "Arial, sans-serif"; /* Sets a modern font */
     popup.style.textAlign = "center"; /* Centers the text */
 
+    popup.id = "unfaker-popup-123123123";
     document.body.prepend(popup);
-    console.log('aqui')
+}
+
+function hideAvaliacaoPopup() {
+    document.querySelector('#unfaker-popup-123123123')?.remove();
+}
+
+function waitForElement(selector) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                observer.disconnect();
+                resolve(document.querySelector(selector));
+            }
+        });
+
+        // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
 }
