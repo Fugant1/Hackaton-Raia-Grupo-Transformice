@@ -27,11 +27,11 @@ app.add_middleware(
 async def scan(request: Request,post_text: str = Query(...)):
     graph = request.app.state.graph 
     test_state = ChatState(post_text=post_text, output="", tools_info={}, score=0.0)
-    result = await graph.ainvoke(test_state)
-    tools_info = result["tools_info"]
+    #result = await graph.ainvoke(test_state)
+    #tools_info = result["tools_info"]
     return {
-         "post_text": result.get("post_text", ""),
-         "output": result.get("output", ""),
+         "post_text": post_text, #result.get("post_text", ""),
+         "output": "banana", #result.get("output", "")
          "metrics": [{"key": "metric1", "description": "sensacionalism", "value": 0.9}],
          "critical_points": ["point1", "point2"]
     }
