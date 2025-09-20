@@ -4,6 +4,135 @@ from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, List, Tuple, Dict
 import json
+import torch
+from transformers import pipeline
+import re
+
+class AnalisadorDeEstilo:
+    def __init__(self):
+        """
+        Inicializa o analisador com uma lista de palavras consideradas sensacionalistas.
+        Esta lista é o coração da análise e pode ser facilmente customizada.
+        """
+        self.palavras_sensacionalistas = set([
+            # Impacto / Choque
+            "chocante","escândalo","imperdível","urgente","explosivo","bombástico","impactante",
+            "revelação","alarmante","polêmico","escabroso","surpreendente","inacreditável",
+            "assustador","aterrorizante","arrasador","devastador","trágico","indignante",
+            "escandaloso","fatal","desesperador","apocalíptico","catastrófico","choque",
+            "horrível","pavoroso","sinistro","terrível","desumano",
+
+            # Intensidade / Emoção Forte
+            "espantoso","extraordinário","abominável","surto","drástico","dramático",
+            "enlouquecedor","tenebroso","macabro","sanguinário","horripilante","repugnante",
+            "hediondo","incrível","fantástico","fenomenal","espetacular","arrasante",
+            "urgência","alerta máximo","pânico","medonho","maldito","perigoso","devastação",
+            "destruição","massacre","colapso","desastre","tragédia","fim do mundo","ultimato",
+            "bomba","caos","explosão","golpe","mistério","reviravolta","conspiração",
+            "segredo sombrio","choque total","tumulto","caótico","descontrole","panela de pressão",
+
+            # Ameaça / Perigo
+            "ameaçador","perturbador","insuportável","desolador","abrupto","escabrosidade",
+            "furioso","intenso","violento","brutal","mortífero","letal","sangrento",
+            "infernal","apavorante","espantamento","desespero","terror","medo extremo",
+            "catástrofe","colapso total","queda livre","implosão","tempestade perfeita",
+
+            # Fim do Mundo / Tragédias
+            "fúria","apoteótico","inevitável","fatalidade","desgraça","tragicidade",
+            "apocalipse","fim dos tempos","juízo final","grande tragédia","devastação total",
+            "desmoronamento","aniquilação","aniquilador","arrasamento","pestilência",
+            "pandemia","epidemia","contágio","pavor coletivo","pânico geral","alarme social"
+        ])
+
+    def analisar(self, texto):
+        """
+        Calcula um score de sensacionalismo de 0 a 10 e destaca os termos problemáticos.
+        """
+        # --- 1. Preparação do Texto ---
+        palavras = re.findall(r'\b\w+\b', texto)
+        num_palavras = len(palavras)
+        if num_palavras == 0:
+            return {"score_sensacionalismo": 0, "termos_destacados": []}
+
+        termos_destacados = []
+        score_bruto = 0
+
+        # --- 2. Análise de Componentes ---
+
+        # Componente A: Palavras em Maiúsculas
+        palavras_maiusculas = [p for p in palavras if p.isupper() and len(p) > 2]
+        ratio_maiusculas = len(palavras_maiusculas) / num_palavras
+        score_bruto += ratio_maiusculas * 30 # Peso alto para maiúsculas
+        for p in palavras_maiusculas:
+            termos_destacados.append({"termo": p, "tipo": "Uso de Maiúsculas"})
+
+        # Componente B: Pontuação Excessiva
+        pontuacao_excessiva = re.findall(r'[!?]{2,}', texto) # Encontra '!!', '??', '?!', etc.
+        num_exclamacoes_interrogacoes = len(re.findall(r'[!?]', texto))
+        ratio_pontuacao = (num_exclamacoes_interrogacoes + len(pontuacao_excessiva)) / num_palavras
+        score_bruto += ratio_pontuacao * 20 # Peso médio para pontuação
+        
+        # Componente C: Palavras Sensacionalistas
+        palavras_encontradas = [p for p in palavras if p.lower() in self.palavras_sensacionalistas]
+        ratio_sensacionalista = len(palavras_encontradas) / num_palavras
+        score_bruto += ratio_sensacionalista * 50 # Peso muito alto para o vocabulário
+        for p in palavras_encontradas:
+            termos_destacados.append({"termo": p, "tipo": "Palavra Sensacionalista"})
+
+        # --- 3. Normalização do Score ---
+        # O score bruto é a soma ponderada dos ratios. Agora, limitamos a 10.
+        score_final = min(10, score_bruto)
+
+        return round(score_final, 2)
+
+
+class AnalisadorDeTomEmocional:
+    def __init__(self):
+        """
+        Inicializa o pipeline do modelo de classificação, configurando-o para usar a GPU se disponível.
+        """
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"Dispositivo selecionado: {self.device}")
+
+        model_name = "tabularisai/multilingual-sentiment-analysis"
+        print(f"Inicializando o pipeline com o modelo ({model_name})...")
+
+        # O pipeline lida com o tokenizer e o modelo, enviando-os para o dispositivo correto.
+        self.model_pipeline = pipeline(
+            "text-classification",
+            model=model_name,
+            device=0 if self.device.type == "cuda" else -1  # 0 para primeira GPU, -1 para CPU
+        )
+        print("Pipeline do modelo carregado com sucesso.")
+
+    def analisar(self, texto: str) -> str:
+        """
+        Realiza a análise de sentimento e retorna o label do sentimento traduzido para o português.
+
+        Args:
+            texto: A string de texto a ser analisada.
+
+        Returns:
+            Uma string com a classificação do sentimento em português.
+        """
+        # A chamada ao pipeline retorna o resultado em inglês.
+        resultado_pipeline = self.model_pipeline(texto)[0]
+        label_em_ingles = resultado_pipeline['label']
+
+        # Dicionário para traduzir os labels de inglês para português.
+        traducao_labels = {
+            "Very Positive": "Muito Positivo",
+            "Positive": "Positivo",
+            "Neutral": "Neutro",
+            "Negative": "Negativo",
+            "Very Negative": "Muito Negativo"
+        }
+
+        # Busca a tradução no dicionário.
+        # O .get() retorna o próprio label em inglês caso não encontre uma tradução.
+        label_em_portugues = traducao_labels.get(label_em_ingles, label_em_ingles)
+
+        return label_em_portugues
 
 class ChatState(TypedDict):
     post_text: str
@@ -11,11 +140,15 @@ class ChatState(TypedDict):
     tools_info: Dict
     
 def get_metrics_node(state: ChatState):
+    analisador = AnalisadorDeTomEmocional()
+    analisador_estilo = AnalisadorDeEstilo()
+    texto = state['post_text']
+    label1 = analisador.analisar(texto)
+    label2 = analisador_estilo.analisar(texto)
     new_state = state
     new_state["tools_info"]["Metricas"] = [
-        {"key": "metric1", "description": "emocionalidade", "value": 0.9},
-        {"key": "metric2", "description": "credibility", "value": 0.7},
-        {"key": "metric3", "description": "bias", "value": 0.4}
+        {"key": "metric1", "description": "emocionalidade", "value": label1},
+        {"key": "metric2", "description": "sensacionalismo", "value": label2}
     ]
     return new_state
 

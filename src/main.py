@@ -7,7 +7,7 @@ from src.agent_workflow.graph.graph import graph, ChatState
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    openai_api_key = os.getenv("OPENAI_API_KEY") 
+    openai_api_key = os.getenv("GOOGLE_API_KEY") 
     app.state.graph = graph(openai_api_key)
     yield
 
