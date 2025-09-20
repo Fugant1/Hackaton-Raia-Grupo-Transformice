@@ -1,0 +1,44 @@
+openapi: 3.0.1
+info:
+  title: Unfaker API
+  version: 1.0.0
+servers:
+  - url: https://dev.api.example.com
+    description: Development server
+paths:
+  /scan:
+    get:
+      tags:
+        - scanning
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+            format: url
+      responses:
+        '200':
+          description: Dados sobre o texto avaliado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  score:
+                    type: number
+                  similar_articles:
+                    type: array
+                    items:
+                      type: string
+                  critical_points:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        trusty:
+                          type: string
+                        tested:
+                          type: string
