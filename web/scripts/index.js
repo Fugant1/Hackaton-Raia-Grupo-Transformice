@@ -9,8 +9,15 @@ const scan = async post_text => {
         .catch(err => err.message);
 }
 
+let latest_path_name = '';
+
 const observer = new MutationObserver(() => {
+    if (window.location.pathname == latest_path_name) {
+        return;
+    }
+
     if (window.location.pathname.includes('/status/')) {
+        latest_path_name = window.location.pathname;
         waitForElement('[data-testid="tweetText"]')
             .then(element => scan(element.innerText))
             .then(showAvaliacaoPopup);
@@ -37,13 +44,13 @@ function showAvaliacaoPopup(avaliacao) {
     popup.style.right = "5%";
     popup.style.width = "400px";
     popup.style.padding = "20px";
-    popup.style.background = "#fff"; /* Changed to white */
-    popup.style.color = "#333"; /* Changed to a dark gray */
-    popup.style.borderRadius = "10px"; /* Adds rounded corners */
-    popup.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)"; /* Adds a subtle shadow */
+    popup.style.background = "#222";
+    popup.style.color = "#eee";
+    popup.style.borderRadius = "10px";
+    popup.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.5)";
     popup.style.zIndex = "10000";
-    popup.style.fontFamily = "Arial, sans-serif"; /* Sets a modern font */
-    popup.style.textAlign = "center"; /* Centers the text */
+    popup.style.fontFamily = "Arial, sans-serif";
+    popup.style.textAlign = "center";
 
     popup.id = "unfaker-popup-123123123";
     document.body.prepend(popup);
@@ -66,7 +73,6 @@ function waitForElement(selector) {
             }
         });
 
-        // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
         observer.observe(document.body, {
             childList: true,
             subtree: true
