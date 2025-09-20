@@ -13,10 +13,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Unfaker API", version="1.0.0", lifespan=lifespan)
 
-origins = [
-    "http://localhost",
-    "http://localhost:8000",
-]
+origins = ['*']
 
 app.add_middleware(
     CORSMiddleware,
