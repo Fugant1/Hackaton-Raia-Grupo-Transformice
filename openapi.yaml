@@ -27,6 +27,8 @@ paths:
                 properties:
                   post_text:
                     type: string
+                  abstract:
+                    type: string
                   metrics:
                     type: array
                     items:
@@ -38,16 +40,7 @@ paths:
                           type: string
                         value:
                           type: number
-                  similar_articles:
-                    type: array
-                    items:
-                      type: string
                   critical_points:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        trusty:
-                          type: string
-                        tested:
-                          type: string
+                      type: string
