@@ -27,7 +27,7 @@ paths:
                 properties:
                   post_text:
                     type: string
-                  abstract:
+                  output:
                     type: string
                   metrics:
                     type: array
