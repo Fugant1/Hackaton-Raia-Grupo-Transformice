@@ -11,12 +11,12 @@ paths:
       tags:
         - scanning
       parameters:
-        - name: url
+        - name: post_text
           in: query
           required: true
           schema:
             type: string
-            format: url
+            format: string
       responses:
         '200':
           description: Dados sobre o texto avaliado
@@ -25,7 +25,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  url:
+                  post_text:
                     type: string
                   score:
                     type: number
