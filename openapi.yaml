@@ -27,12 +27,17 @@ paths:
                 properties:
                   post_text:
                     type: string
-                  score:
-                    type: number
                   metrics:
                     type: array
                     items:
-                      type: string
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        description:
+                          type: string
+                        value:
+                          type: number
                   similar_articles:
                     type: array
                     items:
