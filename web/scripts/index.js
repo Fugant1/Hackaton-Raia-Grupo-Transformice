@@ -1,5 +1,5 @@
 
-const API_URL = `http//localhost:8000`;
+const API_URL = `http://localhost:8000`;
 
 const scan = async post_text => {
     const params = new URLSearchParams({ post_text });
