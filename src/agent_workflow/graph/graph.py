@@ -10,7 +10,6 @@ class ChatState(TypedDict):
     post_text: str
     output: str
     tools_info: Dict
-    score: float
 
 # def search_related_news_node(state: ChatState, google_api_key: str):
 #     llm = ChatGoogleGenerativeAI(temperature=0, model="gemini-2.5-flash-lite", api_key=google_api_key)
@@ -34,14 +33,14 @@ class ChatState(TypedDict):
     #print("search_related_news_node")
 
 def get_metrics_node(state: ChatState, openai_api_key: str):
-    #llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
     print("metrics_node")
 
 def final_answer_node(state: ChatState, openai_api_key: str):
+    metrics = state['tools_info'].get('metrics', {})
     #llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
     print("final_answer_node")
 
-def graph(google_api_key, openai_api_key) -> StateGraph[ChatState]:
+def graph(openai_api_key) -> StateGraph[ChatState]:
     builder = StateGraph(ChatState)
 
     builder.add_node("get_metrics", lambda state: get_metrics_node(state, openai_api_key))

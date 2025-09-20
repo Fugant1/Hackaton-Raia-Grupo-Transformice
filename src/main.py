@@ -7,8 +7,8 @@ from src.agent_workflow.graph.graph import graph, ChatState
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    google_api_key = os.getenv("GOOGLE_API_KEY") 
-    app.state.graph = graph(google_api_key, None)
+    openai_api_key = os.getenv("OPENAI_API_KEY") 
+    app.state.graph = graph(openai_api_key)
     yield
 
 app = FastAPI(title="Unfaker API", version="1.0.0", lifespan=lifespan)
@@ -31,9 +31,9 @@ async def scan(request: Request,post_text: str = Query(...)):
     tools_info = result["tools_info"]
     return {
          "post_text": result.get("post_text", ""),
-         "score": 0.5,
-         "metrics": {"metric1": 0.8, "metric2": 0.6, "metric3": 0.9},
-         "critical_points": [{"trusty": "Test", "tested": "Test"}]
+         "output": result.get("output", ""),
+         "metrics": [{"key": "metric1", "description": "sensacionalism", "value": 0.9}],
+         "critical_points": ["point1", "point2"]
     }
     # tools_info = result.get("tools_info", [])
     # similar_articles = tools_info.get("similar_articles", []) 
