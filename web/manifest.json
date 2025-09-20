@@ -10,8 +10,9 @@
     {
         "js": ["scripts/index.js"],
         "matches": [
-            "https://*/*"
-        ]
+          "https://x.com/*"
+        ],
+        "run_at": "document_idle"
     }
   ]
 }
