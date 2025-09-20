@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Unfaker",
+  "description": "Farejador de notícias falsas",
+  "version": "0.0.0",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+        "js": ["scripts/index.js"],
+        "matches": [
+            "https://*/*"
+        ]
+    }
+  ]
+}
