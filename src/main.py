@@ -21,6 +21,7 @@ async def scan(request: Request,post_text: str = Query(...)):
     return {
          "post_text": result.get("post_text", ""),
          "score": 0.5,
+         "metrics": {"metric1": 0.8, "metric2": 0.6, "metric3": 0.9},
          "similar_articles": ["https://site1.com", "https://site2.com"],
          "critical_points": [{"trusty": "Test", "tested": "Test"}]
     }

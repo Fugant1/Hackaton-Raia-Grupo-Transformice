@@ -29,6 +29,10 @@ paths:
                     type: string
                   score:
                     type: number
+                  metrics:
+                    type: array
+                    items:
+                      type: string
                   similar_articles:
                     type: array
                     items:
