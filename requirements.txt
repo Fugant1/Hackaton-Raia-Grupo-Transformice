@@ -7,3 +7,5 @@ langchain-core
 langchain-community
 unstructured
 GoogleNews
+torch
+transformers
