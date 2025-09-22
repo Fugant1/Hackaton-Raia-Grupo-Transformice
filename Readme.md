@@ -1,5 +1,5 @@
 # Unfaker
-Unfaker is a Chrome extension and API designed to detect fake news in social media posts (currently integrated with X/Twitter).
+Unfaker is an open-source Chrome extension and API designed to detect fake news in social media posts (currently integrated with X/Twitter).
 It uses machine learning models and automated analysis to flag potentially misleading content and provide users with insights before they engage with it.
 
 # Tech Stack
